@@ -78,7 +78,8 @@ openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc
 fi
 
 # Cloning Ansible playbook repository
-export ANSIBLE_LOG_PATH=/home/zhaw/ansible.log
+export ANSIBLE_LOG_PATH=~/log.txt
+export ANSIBLE_DEBUG=True
 echo $(date) " - Cloning Ansible playbook repository" >> ~/log.txt
 
 ((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
@@ -315,7 +316,7 @@ echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running Prerequisites via Ansible Playbook">> ~/log.txt
-runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
+runuser -l $SUDOUSER -c "ansible-playbook -vvv -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml >> ~/log.txt"
 echo $(date) " - Prerequisites check complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
