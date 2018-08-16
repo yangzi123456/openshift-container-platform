@@ -283,6 +283,10 @@ $cnsgroup
 [new_nodes]
 EOF
 
+
+
+echo $(date) " - good1" >> ~/log.txt
+
 if [[ $AZURE == "true" ]]
 then
     # Create /etc/origin/cloudprovider/azure.conf on all hosts if Azure is enabled
@@ -295,27 +299,27 @@ then
         exit 13
     fi
 fi
-
+echo $(date) " - good2" >> ~/log.txt
 # Setup NetworkManager to manage eth0
-echo $(date) " - Running NetworkManager playbook"
+echo $(date) " - Running NetworkManager playbook">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/openshift-node/network_manager.yml"
 
 # Configure DNS so it always has the domain name
-echo $(date) " - Adding $DOMAIN to search for resolv.conf"
+echo $(date) " - Adding $DOMAIN to search for resolv.conf">> ~/log.txt
 runuser $SUDOUSER -c "ansible all -o -f 10 -b -m lineinfile -a 'dest=/etc/sysconfig/network-scripts/ifcfg-eth0 line=\"DOMAIN=$DOMAIN\"'"
 
 # Configure resolv.conf on all hosts through NetworkManager
-echo $(date) " - Restarting NetworkManager"
+echo $(date) " - Restarting NetworkManager">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkManager state=restarted\""
 echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
-echo $(date) " - Running Prerequisites via Ansible Playbook"
+echo $(date) " - Running Prerequisites via Ansible Playbook">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml"
 echo $(date) " - Prerequisites check complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
-echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook"
+echo $(date) " - Installing OpenShift Container Platform via Ansible Playbook">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml"
 if [ $? -eq 0 ]
 then
@@ -325,15 +329,15 @@ else
     exit 6
 fi
 
-echo $(date) " - Modifying sudoers"
+echo $(date) " - Modifying sudoers">> ~/log.txt
 sed -i -e "s/Defaults    requiretty/# Defaults    requiretty/" /etc/sudoers
 sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"/aDefaults    env_keep += "PATH"' /etc/sudoers
 
 # Deploying Registry
-echo $(date) " - Registry automatically deployed to infra nodes"
+echo $(date) " - Registry automatically deployed to infra nodes">> ~/log.txt
 
 # Deploying Router
-echo $(date) " - Router automaticaly deployed to infra nodes"
+echo $(date) " - Router automaticaly deployed to infra nodes">> ~/log.txt
 echo $(date) " - Re-enabling requiretty"
 sed -i -e "s/# Defaults    requiretty/Defaults    requiretty/" /etc/sudoers
 
@@ -349,15 +353,15 @@ rm -f /tmp/kube-config
 yum -y install atomic-openshift-clients
 
 # Adding user to OpenShift authentication file
-echo $(date) " - Adding OpenShift user"
+echo $(date) " - Adding OpenShift user">> ~/log.txt
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/addocpuser.yaml"
 
 # Assigning cluster admin rights to OpenShift user
-echo $(date) " - Assigning cluster admin rights to user"
+echo $(date) " - Assigning cluster admin rights to user">> ~/log.txt
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/assignclusteradminrights.yaml"
 
 # Configure Docker Registry to use Azure Storage Account
-echo $(date) " - Configuring Docker Registry to use Azure Storage Account"
+echo $(date) " - Configuring Docker Registry to use Azure Storage Account">> ~/log.txt
 runuser $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/$DOCKERREGISTRYYAML"
 
 # Setting CNS as default storage, only AZURE being true will override it
@@ -409,12 +413,12 @@ then
 fi
 
 # Adding some labels back because they go missing
-echo $(date) " - Adding api and logging labels"
+echo $(date) " - Adding api and logging labels">> ~/log.txt
 runuser -l $SUDOUSER -c  "oc label --overwrite nodes $MASTER-0 openshift-infra=apiserver"
 runuser -l $SUDOUSER -c  "oc label --overwrite nodes --all logging-infra-fluentd=true logging=true"
 
 # Restarting things so everything is clean before installing anything else
-echo $(date) " - Rebooting cluster to complete installation"
+echo $(date) " - Rebooting cluster to complete installation">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 sleep 20
@@ -429,7 +433,7 @@ fi
 if [ $METRICS == "true" ]
 then
     sleep 30
-    echo $(date) "- Deploying Metrics"
+    echo $(date) "- Deploying Metrics">> ~/log.txt
     if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
     then
         runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-metrics/config.yml -e openshift_metrics_install_metrics=True -e openshift_metrics_cassandra_storage_type=dynamic"
@@ -450,7 +454,7 @@ fi
 if [ $LOGGING == "true" ]
 then
     sleep 60
-    echo $(date) "- Deploying Logging"
+    echo $(date) "- Deploying Logging">> ~/log.txt
     if [ $AZURE == "true" ] || [ $ENABLECNS == "true" ]
     then
         runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/openshift-logging/config.yml -e openshift_logging_install_logging=True -e openshift_logging_es_pvc_dynamic=true"
@@ -469,7 +473,7 @@ fi
 # Configure cluster for private masters
 if [ $MASTERCLUSTERTYPE == "private" ]
 then
-	echo $(date) " - Configure cluster for private masters"
+	echo $(date) " - Configure cluster for private masters">> ~/log.txt
 	runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/activate-private-lb.yaml"
 
 	echo $(date) " - Delete Master Public IP if cluster is using private masters"
@@ -481,18 +485,18 @@ fi
 # Delete Router / Infra Public IP if cluster is using private router
 if [ $ROUTERCLUSTERTYPE == "private" ]
 then
-	echo $(date) " - Delete Router / Infra Public IP address"
+	echo $(date) " - Delete Router / Infra Public IP address">> ~/log.txt
 	az login --service-principal -u $AADCLIENTID -p $AADCLIENTSECRET -t $TENANTID
 	az account set -s $SUBSCRIPTIONID
 	az network public-ip delete -g $RESOURCEGROUP -n $INFRAPIPNAME
 fi
 
 # Setting Masters to non-schedulable
-echo $(date) " - Setting Masters to non-schedulable"
+echo $(date) " - Setting Masters to non-schedulable">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reset-masters-non-schedulable.yaml"
 
 # Delete yaml files
-echo $(date) " - Deleting unecessary files"
+echo $(date) " - Deleting unecessary files">> ~/log.txt
 rm -rf /home/${SUDOUSER}/openshift-container-platform-playbooks
 
 echo $(date) " - Sleep for 30"
