@@ -3,7 +3,7 @@
 echo $(date) " - Starting Script"
 
 set -e
-export ANSIBLE_LOG_PATH=/home/zhaw/ansible.log
+
 export SUDOUSER=$1
 export PASSWORD="$2"
 export MASTER=$3
@@ -50,7 +50,7 @@ export MASTERLOOP=$((MASTERCOUNT - 1))
 export INFRALOOP=$((INFRACOUNT - 1))
 export NODELOOP=$((NODECOUNT - 1))
 
-echo "Configuring SSH ControlPath to use shorter path name"
+echo "Configuring SSH ControlPath to use shorter path name" >> ~/log.txt
 
 sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
 sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
@@ -78,8 +78,8 @@ openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc
 fi
 
 # Cloning Ansible playbook repository
-
-echo $(date) " - Cloning Ansible playbook repository"
+export ANSIBLE_LOG_PATH=/home/zhaw/ansible.log
+echo $(date) " - Cloning Ansible playbook repository" >> ~/log.txt
 
 ((cd /home/$SUDOUSER && git clone https://github.com/Microsoft/openshift-container-platform-playbooks.git) || (cd /home/$SUDOUSER/openshift-container-platform-playbooks && git pull))
 
@@ -92,7 +92,7 @@ else
 fi
 
 # Creating variables file for future playbooks
-echo $(date) " - Creating variables file for future playbooks"
+echo $(date) " - Creating variables file for future playbooks" >> ~/log.txt
 cat > /home/$SUDOUSER/openshift-container-platform-playbooks/vars.yaml <<EOF
 admin_user: $SUDOUSER
 master_lb_private_dns: $PRIVATEDNS
@@ -102,7 +102,7 @@ EOF
 export DOMAIN=`domainname -d`
 
 # Configure Master cluster address information based on Cluster type (private or public)
-echo $(date) " - Create variable for master cluster address based on cluster type"
+echo $(date) " - Create variable for master cluster address based on cluster type" >> ~/log.txt
 if [[ $MASTERCLUSTERTYPE == "private" ]]
 then
 	MASTERCLUSTERADDRESS="openshift_master_cluster_hostname=$MASTER-0
@@ -115,7 +115,7 @@ openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS"
 fi
 
 # Create Master nodes grouping
-echo $(date) " - Creating Master nodes grouping"
+echo $(date) " - Creating Master nodes grouping" >> ~/log.txt
 for (( c=0; c<$MASTERCOUNT; c++ ))
 do
     mastergroup="$mastergroup
@@ -123,7 +123,7 @@ $MASTER-$c openshift_node_labels=\"{'region': 'master', 'zone': 'default'}\" ope
 done
 
 # Create Infra nodes grouping 
-echo $(date) " - Creating Infra nodes grouping"
+echo $(date) " - Creating Infra nodes grouping" >> ~/log.txt
 for (( c=0; c<$INFRACOUNT; c++ ))
 do
     infragroup="$infragroup
@@ -131,7 +131,7 @@ $INFRA-$c openshift_node_labels=\"{'region': 'infra', 'zone': 'default'}\" opens
 done
 
 # Create Nodes grouping
-echo $(date) " - Creating Nodes grouping"
+echo $(date) " - Creating Nodes grouping" >> ~/log.txt
 for (( c=0; c<$NODECOUNT; c++ ))
 do
     nodegroup="$nodegroup
