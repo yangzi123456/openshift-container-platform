@@ -3,7 +3,7 @@
 echo $(date) " - Starting Script"
 
 set -e
-export ANSIBLE_CONFIG=~/ansible.log
+export ANSIBLE_LOG_PATH=~/ansible.log
 export SUDOUSER=$1
 export PASSWORD="$2"
 export MASTER=$3
