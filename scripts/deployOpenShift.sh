@@ -315,6 +315,17 @@ runuser -l $SUDOUSER -c "ansible all -o -f 10 -b -m service -a \"name=NetworkMan
 echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
+echo $(date) " - Running master0">> ~/log.txt
+runuser -l $SUDOUSER -c "ssh mycluster-master-0 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+echo $(date) " - Running master1">> ~/log.txt
+runuser -l $SUDOUSER -c "ssh mycluster-master-1 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+runuser -l $SUDOUSER -c "ssh mycluster-master-2 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+runuser -l $SUDOUSER -c "ssh mycluster-node-0 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+runuser -l $SUDOUSER -c "ssh mycluster-node-1 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+runuser -l $SUDOUSER -c "ssh mycluster-infra-0 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+runuser -l $SUDOUSER -c "ssh mycluster-infra-1 \"sudo sed -i -e \"s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/\" /etc/sysconfig/docker'"
+
+
 echo $(date) " - Running Prerequisites via Ansible Playbook">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -vvv -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml >> ~/log.txt"
 echo $(date) " - Prerequisites check complete"
