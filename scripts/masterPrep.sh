@@ -94,8 +94,9 @@ yum -y install docker
 # Update docker storage
 echo "
 # Adding insecure-registry option required by OpenShift
-OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"
+# OPTIONS=\"\$OPTIONS --insecure-registry 172.30.0.0/16\"
 " >> /etc/sysconfig/docker
+
 
 # Create thin pool logical volume for Docker
 echo $(date) " - Creating thin pool logical volume for Docker and staring service"
@@ -119,7 +120,7 @@ else
 fi
 
 # Enable and start Docker services
-
+sudo sed -i -e "s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/" /etc/sysconfig/docker
 systemctl enable docker
 systemctl start docker
 
