@@ -112,7 +112,7 @@ else
 fi
 
 # Enable and start Docker services
-
+sudo sed -i -e "s/^OPTIONS=' --selinux-enabled/OPTIONS='--selinux-enabled=False/" /etc/sysconfig/docker
 systemctl enable docker
 systemctl start docker
 
