@@ -68,6 +68,8 @@ else
     export CLOUDNAME="AzurePublicCloud"
 fi
 
+export CLOUDNAME="AzureChinaCloud"
+
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 if [[ $AZURE == "true" ]]
 then
