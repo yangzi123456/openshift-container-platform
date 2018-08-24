@@ -284,6 +284,8 @@ $cnsgroup
 [new_nodes]
 EOF
 
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-master.yaml"
+runuser -l $SUDOUSER -c "ansible-playbook -f 10 ~/openshift-container-platform-playbooks/reboot-nodes.yaml"
 
 
 echo $(date) " - good1" >> ~/log.txt
@@ -316,8 +318,8 @@ echo $(date) " - NetworkManager configuration complete"
 
 # Initiating installation of OpenShift Container Platform using Ansible Playbook
 echo $(date) " - Running master0">> ~/log.txt
-runuser -l $SUDOUSER -c "ansible all  -a \"sudo sed -i -e "s/=False//" /etc/sysconfig/docker"\"
-runuser -l $SUDOUSER -c "ansible all  -a \"sudo sed -i -e "s/selinux-enabled/selinux-enabled=False/" /etc/sysconfig/docker"\"
+#runuser -l $SUDOUSER -c "ansible all  -a \"sudo sed -i -e "s/=False//" /etc/sysconfig/docker"\"
+#runuser -l $SUDOUSER -c "ansible all  -a \"sudo sed -i -e "s/selinux-enabled/selinux-enabled=False/" /etc/sysconfig/docker"\"
 
 echo $(date) " - Running Prerequisites via Ansible Playbook">> ~/log.txt
 runuser -l $SUDOUSER -c "ansible-playbook -vvv -f 10 /usr/share/ansible/openshift-ansible/playbooks/prerequisites.yml >> ~/log.txt"
