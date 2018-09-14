@@ -73,7 +73,7 @@ export CLOUDNAME="AzureChinaCloud"
 # Setting the default openshift_cloudprovider_kind if Azure enabled
 #if [[ $AZURE == "true" ]]
 #then
-    CLOUDKIND="openshift_cloudprovider_kind=azure
+#    CLOUDKIND="openshift_cloudprovider_kind=azure
 #osm_controller_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
 #osm_api_server_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf']}
 #openshift_node_kubelet_args={'cloud-provider': ['azure'], 'cloud-config': ['/etc/origin/cloudprovider/azure.conf'], 'enable-controller-attach-detach': ['true']}"
